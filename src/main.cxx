@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
             "[< file_list (if -s is set)]\n",
             left_margin, argv[0]);
         fputs("OPTIONS\n", stderr);
-        fprintf(stderr, "%s-h\tHuman-readable code (in contrast to the default""base64 encoded zlib compressed code)\n", left_margin);
+        fprintf(stderr, "%s-h\tHuman-readable code (in contrast to the default base64 encoded zlib compressed code)\n", left_margin);
         exit(-1);
     }
 
