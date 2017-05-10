@@ -9,7 +9,7 @@ CXX=g++
 CC=gcc
 #OPTFLAGS=-g -O0 -DUNHASHED_CODES
 OPTFLAGS=-O3 -DBOOST_UBLAS_NDEBUG -DNDEBUG -DUNHASHED_CODES
-BOOST_CFLAGS=-I/usr/local/include/boost
+BOOST_CFLAGS=-I/usr/local/include/boost -I/usr/local/Cellar/boost/1.64.0_1/include/
 JNI_CFLAGS=-I$$JAVA_HOME/include/ -I$$JAVA_HOME/include/darwin/ -I$$JAVA_HOME/include/linux/
 TAGLIB_CFLAGS=`taglib-config --cflags`
 TAGLIB_LIBS=`taglib-config --libs`
@@ -30,7 +30,7 @@ MODULES_LIB = \
     Whitening.o \
 	functions.o \
 	echoprint.o
-	
+
 MODULES = $(MODULES_LIB) Metadata.o
 
 all: libcodegen echoprint-codegen
@@ -65,6 +65,10 @@ clean:
 ifeq ($(UNAME),Darwin)
 	rm -f *.dylib
 endif
+
+echoprint-codegen-clion: echoprint-codegen
+	echo Compiling echoprint-codegen for CLion in: $(CLION_EXE_DIR)/echoprint-codegen...
+	mv ../echoprint-codegen $(CLION_EXE_DIR)/echoprint-codegen
 
 PREFIX ?= /usr/local
 DESTDIR ?= $(PREFIX)

@@ -68,6 +68,10 @@ codegen_response_t *codegen_file(char* filename, int start_offset, int duration,
 
     int numSamples = pAudio->getNumSamples();
 
+    cout << "File name is: ";
+    cout << filename;
+    cout << "\n";
+
     if (numSamples < 1) {
         char* output = (char*) malloc(16384);
         sprintf(output,"{\"error\":\"could not decode\", \"tag\":%d, \"metadata\":{\"filename\":\"%s\"}}",

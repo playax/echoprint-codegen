@@ -100,6 +100,7 @@ bool AudioStreamInput::ProcessFilePointer(FILE* pFile) {
     do {
         short* pChunk = new short[nSamplesPerChunk];
         samplesRead = fread(pChunk, sizeof (short), nSamplesPerChunk, pFile);
+        // std::cout << "Just read: " << samplesRead << "\n";
         _NumberSamples += samplesRead;
         vChunks.push_back(pChunk);
     } while (samplesRead > 0);

@@ -3,7 +3,7 @@
 //  Copyright 2011 The Echo Nest Corporation. All rights reserved.
 //
 
-
+#include <fstream>
 #include <sstream>
 #include <iostream>
 #include <iomanip>
@@ -39,6 +39,22 @@ Codegen::Codegen(const float* pcm, unsigned int numSamples, int start_offset) {
     SubbandAnalysis *pSubbandAnalysis = new SubbandAnalysis(pAudio);
     pSubbandAnalysis->Compute();
 
+    // ========================================================================
+
+    std::ofstream subbandSpectrogram;
+    matrix_f E = pSubbandAnalysis->getMatrix();
+    subbandSpectrogram.open("subband_spectrogram.txt");
+    subbandSpectrogram.precision(std::numeric_limits<float>::max_digits10);
+
+    for (int i = 0; i < pSubbandAnalysis->getNumFrames(); ++i) {
+        for (int j = 0; j < pSubbandAnalysis->getNumBands(); ++j) {
+            subbandSpectrogram << i << "," << j << "," << std::fixed << E(j,i) << "\n";
+        }
+    }
+
+    subbandSpectrogram.close();
+
+    // ========================================================================
     Fingerprint *pFingerprint = new Fingerprint(pSubbandAnalysis, start_offset);
     pFingerprint->Compute();
 

@@ -17,6 +17,11 @@
 
 namespace SubbandFilterBank {
     // 128pt, 1/8th band low-pass prototype subsampled from Table_analysis_window
+    //
+    // The MPEG standard defines 512 coefficients of the analysis window.
+    // This are 128 of those coefficients, as defined in:
+    // http://www.codelooker.com/codea/219234032923MPEGAudio/Table_analysis_window.m.html
+    // These coefficients correspond to indexes (4, 8, 12, 16, 20, 24, 28, 32, etc)
     static const float C[C_LEN] = {
          0.000000477,  0.000000954,  0.000001431,  0.000002384,  0.000003815,  0.000006199,  0.000009060,  0.000013828,
          0.000019550,  0.000027657,  0.000037670,  0.000049591,  0.000062943,  0.000076771,  0.000090599,  0.000101566,

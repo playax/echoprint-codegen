@@ -62,8 +62,8 @@ protected:
         // TODO: Windows
         char message[4096] = {0};
         if (_Offset_s == 0 && _Seconds == 0)
-            snprintf(message, NELEM(message), "ffmpeg -i \"%s\"  -ac %d -ar %d -f s16le - 2>%s",
-                    filename, Params::AudioStreamInput::Channels, (uint) Params::AudioStreamInput::SamplingRate, DEVNULL);
+            snprintf(message, NELEM(message), "ffmpeg -i \"%s\"  -ac %d -ar %d -f s16le -",
+                    filename, Params::AudioStreamInput::Channels, (uint) Params::AudioStreamInput::SamplingRate);
         else
             snprintf(message, NELEM(message), "ffmpeg -i \"%s\"  -ac %d -ar %d -f s16le -t %d -ss %d - 2>%s",
                     filename, Params::AudioStreamInput::Channels, (uint) Params::AudioStreamInput::SamplingRate, _Seconds, _Offset_s, DEVNULL);
