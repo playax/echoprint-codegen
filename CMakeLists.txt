@@ -3,21 +3,23 @@ project(echoprint_codegen)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(OPTFLAGS "-O3 -DBOOST_UBLAS_NDEBUG -DNDEBUG -DUNHASHED_CODES")
+#set(OPTFLAGS "-O3 -DBOOST_UBLAS_NDEBUG -DNDEBUG -DUNHASHED_CODES")
+set(OPTFLAGS "-O0 -g -DBOOST_UBLAS_NDEBUG -DNDEBUG -DUNHASHED_CODES")
 set(BOOST_CFLAGS "-I/usr/local/include/boost -I/usr/local/Cellar/boost/1.64.0_1/include/")
 set(JNI_CFLAGS "-I/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/include/ -I/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/include/darwin/ -I/Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home/include/linux/")
 
 set(TAGLIB_CFLAGS "-I/usr/local/Cellar/taglib/1.9.1/include/taglib")
 set(TAGLIB_LIBS "-L/usr/local/Cellar/taglib/1.9.1/lib -ltag")
 
+set(AUBIO_LIBS "-L/Users/devstation2/dev/aubio/aubio/build/src -laubio")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${BOOST_CFLAGS} ${TAGLIB_CFLAGS} ${JNI_CFLAGS} -fPIC ${OPTFLAGS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC ${OPTFLAGS}")
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${TAGLIB_LIBS} -lz -lpthread ${OPTFLAGS}")
-set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${TAGLIB_LIBS} -lz -lpthread ${OPTFLAGS}")
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${TAGLIB_LIBS} -lz -lpthread ${OPTFLAGS}")
-set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} ${TAGLIB_LIBS} -lz -lpthread ${OPTFLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${TAGLIB_LIBS} ${AUBIO_LIBS} -lz -lpthread ${OPTFLAGS}")
+set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${TAGLIB_LIBS} ${AUBIO_LIBS} -lz -lpthread ${OPTFLAGS}")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${TAGLIB_LIBS} ${AUBIO_LIBS} -lz -lpthread ${OPTFLAGS}")
+set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} ${TAGLIB_LIBS} ${AUBIO_LIBS} -lz -lpthread ${OPTFLAGS}")
 
 set(SOURCE_FILES
         src/AudioBufferInput.cxx
@@ -47,6 +49,6 @@ set(SOURCE_FILES
         src/Whitening.cxx
         src/Whitening.h
         src/win_funcs.h
-        src/win_unistd.h)
+        src/win_unistd.h src/Aubio.h)
 
 add_executable(echoprint_codegen ${SOURCE_FILES})

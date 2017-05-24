@@ -7,6 +7,10 @@
 #include "SubbandAnalysis.h"
 #include "AudioStreamInput.h"
 
+// basic file operations
+#include <iostream>
+#include <fstream>
+
 #ifdef _WIN32
 #include "win_funcs.h"
 #endif
@@ -84,6 +88,7 @@ void SubbandAnalysis::Compute() {
 
         // The Y vector is transformed using a variant of the Modified Discrete
         // Cosine Transform (MDCT) to yield the desired 8 subband values.
+        // Esse não é o MDCT, é o matrixing.
         for (i = 0; i < M_ROWS; ++i) {
             float Dr = 0, Di = 0;
             for (j = 0; j < M_COLS; ++j) {
@@ -93,5 +98,24 @@ void SubbandAnalysis::Compute() {
             _Data(i, frameCounter) = Dr*Dr + Di*Di;
         }
     }
+
+    std::ofstream subbandAnalysisFile;
+    subbandAnalysisFile.open("subband_analysis.csv");
+
+    subbandAnalysisFile << "band0, band1, band2, band3, band4, band5, band6, band7\n";
+
+    for (int k = 0; k < _NumFrames; ++k) {
+        for (int l = 0; l < M_ROWS; ++l) {
+            if (l == M_ROWS - 1) {
+                subbandAnalysisFile << _Data(l, k);
+            } else {
+                subbandAnalysisFile << _Data(l, k) << ",";
+            }
+        }
+
+        subbandAnalysisFile << "\n";
+    }
+
+    subbandAnalysisFile.close();
 }
 

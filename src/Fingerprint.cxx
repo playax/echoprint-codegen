@@ -6,6 +6,7 @@
 
 #include "Fingerprint.h"
 #include "Params.h"
+#include "Aubio.h"
 #include <string.h>
 
 #ifdef _WIN32
@@ -81,6 +82,58 @@ uint Fingerprint::adaptiveOnsets(int ttarg, matrix_u&out, uint*&onset_counter_fo
 
     matrix_f E = _pSubbandAnalysis->getMatrix();
 
+
+    // -------------------------
+    // Aubio onset detection
+    // -------------------------
+
+    onset_counter_for_band = new uint[SUBBANDS];
+
+    for (int l = 0; l < SUBBANDS; ++l) {
+        onset_counter_for_band[l] = 0;
+    }
+
+    float aubio_buffer[128];
+    uint_t aubio_onset_detection_result;
+
+    echo_aubio_prepare();
+
+    printf("Matrix E: %lu x %lu\n", E.size1(), E.size2());
+
+    // # frames = # samples (sample rate / 8)
+    for (int subband = 0; subband < 1 /* SUBBANDS */; ++subband) {
+        for (int num_sample = 0; num_sample < E.size2(); num_sample += 128) {
+
+            printf("Processing samples %d--%d for band %d\n", num_sample, num_sample + 127, subband);
+
+            for (int _k = 0; _k < 128; _k++) {
+                aubio_buffer[_k] = E(subband, _k);
+            }
+
+            if (subband == 2 && num_sample == 1024) {
+                printf("Samples 1024--1024+127 for band 2\n");
+
+                for (int _k = 0; _k < 128; _k++) {
+                    printf("%f\n", aubio_buffer[_k]);
+                }
+            }
+
+            aubio_onset_detection_result = echo_aubio_onset_do(aubio_buffer);
+
+            if (aubio_onset_detection_result > 0) {
+                out(subband, onset_counter_for_band[subband]++) = aubio_onset_detection_result;
+                ++onset_counter;
+            }
+
+        }
+    }
+
+    return onset_counter;
+
+    // -------------------------
+    // Original onset detection
+    // -------------------------
+
     // Take successive stretches of 8 subband samples and sum their energy under a hann window, then hop by 4 samples (50% window overlap).
     int hop = 4;
     int nsm = 8;
@@ -149,6 +202,7 @@ uint Fingerprint::adaptiveOnsets(int ttarg, matrix_u&out, uint*&onset_counter_fo
 //        }
 //        std::cout << std::endl;
 //    }
+
 
     for (i = 0; i < frames; ++i) {
         for (j = 0; j < SUBBANDS; ++j) {
