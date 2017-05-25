@@ -11,9 +11,9 @@
 //uint_t hop_size = 256;
 //uint_t sample_rate = 44100;
 
-uint_t buf_size = 256;
-uint_t hop_size = 128;
-uint_t sample_rate = 5512;
+uint_t buf_size = 512;
+uint_t hop_size = 256;
+uint_t sample_rate = 11025;
 
 
 aubio_onset_t *echo_o;
@@ -32,7 +32,7 @@ void echo_aubio_prepare() {
 uint_t echo_aubio_onset_do(float *aubio_buffer) {
 
     for (int i = 0; i < hop_size; ++i) {
-        echo_ibuf->data[i] = aubio_buffer[i];
+        echo_ibuf->data[i] = (smpl_t) aubio_buffer[i] * 1.413893586; // Fix to provide the same values as aubio would read from the command line
     }
 
     aubio_onset_do(echo_o, echo_ibuf, echo_onset);

@@ -59,6 +59,8 @@ bool AudioStreamInput::ProcessFile(const char* filename, int offset_s/*=0*/, int
     _Seconds = seconds;
     std::string message = GetCommandLine(filename);
 
+    std::cout << "FFMPEG command line: " << message << std::endl;
+
     FILE* fp = popen(message.c_str(), POPEN_MODE);
     bool ok = (fp != NULL);
     if (ok)
@@ -101,11 +103,22 @@ bool AudioStreamInput::ProcessFilePointer(FILE* pFile) {
         short* pChunk = new short[nSamplesPerChunk];
         samplesRead = fread(pChunk, sizeof (short), nSamplesPerChunk, pFile);
         // std::cout << "Just read: " << samplesRead << "\n";
+
+        // std::cout << "Read samples:" << std::endl;
+
+//        for (int _i = 0; _i < nSamplesPerChunk; ++_i) {
+//            std::cout << pChunk[_i] << std::endl;
+//        }
+
+        // std::cout << "EOCHUNK" << std::endl;
+
         _NumberSamples += samplesRead;
         vChunks.push_back(pChunk);
     } while (samplesRead > 0);
 
     // Convert from shorts to 16-bit floats and copy into sample buffer.
+    // Convert from signed shorts to floats in the range [-1, 1].
+    // Signed short range: [-32,768, 32,767]
     uint sampleCounter = 0;
     _pSamples = new float[_NumberSamples];
     uint samplesLeft = _NumberSamples;

@@ -55,6 +55,56 @@ unsigned int MurmurHash2 ( const void * key, int len, unsigned int seed ) {
 Fingerprint::Fingerprint(SubbandAnalysis* pSubbandAnalysis, int offset)
     : _pSubbandAnalysis(pSubbandAnalysis), _Offset(offset) { }
 
+uint Fingerprint::aubioOnsets(const float *pcm, unsigned int numSamples, matrix_u &out, uint *&onset_counter_for_band) {
+    uint onset_counter = 0;
+    // -------------------------
+    // Aubio onset detection
+    // -------------------------
+
+    onset_counter_for_band = new uint[SUBBANDS];
+    out = matrix_u(SUBBANDS, numSamples);
+
+    uint hop_size=256;
+
+    for (int l = 0; l < SUBBANDS; ++l) {
+        onset_counter_for_band[l] = 0;
+    }
+
+    float aubio_buffer[256];
+    uint_t aubio_onset_detection_result;
+
+    uint_t subband = 0;
+
+    echo_aubio_prepare();
+
+    for (int num_sample = 0; num_sample < numSamples; num_sample += hop_size) {
+
+        printf("Processing samples %d--%d for band %d\n", num_sample, num_sample + hop_size - 1, 0);
+
+        for (int _k = 0; _k < hop_size; _k++) {
+            aubio_buffer[_k] = pcm[num_sample + _k];
+        }
+
+//        if (num_sample == 1024) {
+//            printf("Samples 1024--1024+255 for band 2\n");
+//
+//            for (int _k = 0; _k < hop_size; _k++) {
+//                printf("%f\n", aubio_buffer[_k]);
+//            }
+//        }
+
+        aubio_onset_detection_result = echo_aubio_onset_do(aubio_buffer);
+
+        if (aubio_onset_detection_result > 0) {
+            out(subband, onset_counter_for_band[subband]++) = aubio_onset_detection_result;
+            ++onset_counter;
+        }
+
+    }
+
+    return onset_counter;
+}
+
 /**
  *
  * @param ttarg T_targ: target spacing between onsets reported in any subband. The default value of T_targ is 345 to
@@ -81,54 +131,6 @@ uint Fingerprint::adaptiveOnsets(int ttarg, matrix_u&out, uint*&onset_counter_fo
     uint onset_counter = 0;
 
     matrix_f E = _pSubbandAnalysis->getMatrix();
-
-
-    // -------------------------
-    // Aubio onset detection
-    // -------------------------
-
-    onset_counter_for_band = new uint[SUBBANDS];
-
-    for (int l = 0; l < SUBBANDS; ++l) {
-        onset_counter_for_band[l] = 0;
-    }
-
-    float aubio_buffer[128];
-    uint_t aubio_onset_detection_result;
-
-    echo_aubio_prepare();
-
-    printf("Matrix E: %lu x %lu\n", E.size1(), E.size2());
-
-    // # frames = # samples (sample rate / 8)
-    for (int subband = 0; subband < 1 /* SUBBANDS */; ++subband) {
-        for (int num_sample = 0; num_sample < E.size2(); num_sample += 128) {
-
-            printf("Processing samples %d--%d for band %d\n", num_sample, num_sample + 127, subband);
-
-            for (int _k = 0; _k < 128; _k++) {
-                aubio_buffer[_k] = E(subband, _k);
-            }
-
-            if (subband == 2 && num_sample == 1024) {
-                printf("Samples 1024--1024+127 for band 2\n");
-
-                for (int _k = 0; _k < 128; _k++) {
-                    printf("%f\n", aubio_buffer[_k]);
-                }
-            }
-
-            aubio_onset_detection_result = echo_aubio_onset_do(aubio_buffer);
-
-            if (aubio_onset_detection_result > 0) {
-                out(subband, onset_counter_for_band[subband]++) = aubio_onset_detection_result;
-                ++onset_counter;
-            }
-
-        }
-    }
-
-    return onset_counter;
 
     // -------------------------
     // Original onset detection
@@ -305,7 +307,7 @@ uint Fingerprint::quantized_time_for_frame_absolute(uint frame) {
 }
 
 
-void Fingerprint::Compute() {
+void Fingerprint::Compute(const float *pcm, unsigned int numSamples) {
     uint actual_codes = 0;
 #if !defined(UNHASHED_CODES)
     unsigned char hash_material[5];
@@ -314,7 +316,7 @@ void Fingerprint::Compute() {
     uint * onset_counter_for_band;
     matrix_u out;
 
-    uint onset_count = adaptiveOnsets(345, out, onset_counter_for_band);
+    uint onset_count = aubioOnsets(pcm, numSamples, out, onset_counter_for_band);
     _Codes.resize(onset_count*6);
 
     std::cout << "Total onsets count: " << onset_count << std::endl;

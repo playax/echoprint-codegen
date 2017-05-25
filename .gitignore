@@ -1,3 +1,8 @@
 *.o
 *.dylib
 *.so
+
+# IntelliJ IDEA
+.idea
+cmake-build-debug
+target

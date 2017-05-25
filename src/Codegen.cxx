@@ -31,32 +31,32 @@ Codegen::Codegen(const float* pcm, unsigned int numSamples, int start_offset) {
         throw std::runtime_error("File was too big\n");
 
     Whitening *pWhitening = new Whitening(pcm, numSamples);
-    pWhitening->Compute();
-
+//    pWhitening->Compute();
+//
     AudioBufferInput *pAudio = new AudioBufferInput();
-    pAudio->SetBuffer(pWhitening->getWhitenedSamples(), pWhitening->getNumSamples());
-
+//    pAudio->SetBuffer(pWhitening->getWhitenedSamples(), pWhitening->getNumSamples());
+//
     SubbandAnalysis *pSubbandAnalysis = new SubbandAnalysis(pAudio);
-    pSubbandAnalysis->Compute();
+//    pSubbandAnalysis->Compute();
 
     // ========================================================================
 
-    std::ofstream subbandSpectrogram;
-    matrix_f E = pSubbandAnalysis->getMatrix();
-    subbandSpectrogram.open("subband_spectrogram.txt");
-    subbandSpectrogram.precision(std::numeric_limits<float>::max_digits10);
-
-    for (int i = 0; i < pSubbandAnalysis->getNumFrames(); ++i) {
-        for (int j = 0; j < pSubbandAnalysis->getNumBands(); ++j) {
-            subbandSpectrogram << i << "," << j << "," << std::fixed << E(j,i) << "\n";
-        }
-    }
-
-    subbandSpectrogram.close();
+//    std::ofstream subbandSpectrogram;
+//    matrix_f E = pSubbandAnalysis->getMatrix();
+//    subbandSpectrogram.open("subband_spectrogram.txt");
+//    subbandSpectrogram.precision(std::numeric_limits<float>::max_digits10);
+//
+//    for (int i = 0; i < pSubbandAnalysis->getNumFrames(); ++i) {
+//        for (int j = 0; j < pSubbandAnalysis->getNumBands(); ++j) {
+//            subbandSpectrogram << i << "," << j << "," << std::fixed << E(j,i) << "\n";
+//        }
+//    }
+//
+//    subbandSpectrogram.close();
 
     // ========================================================================
     Fingerprint *pFingerprint = new Fingerprint(pSubbandAnalysis, start_offset);
-    pFingerprint->Compute();
+    pFingerprint->Compute(pcm, numSamples);
 
 #if defined(UNHASHED_CODES)
     _CodeString = createCodeStringJSON(pFingerprint->getCodes());
